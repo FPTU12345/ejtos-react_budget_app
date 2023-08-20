@@ -1,36 +1,50 @@
-import React, { useContext, useState } from "react";
-import { AppContext } from "../context/AppContext";
+import React, { useContext } from 'react';
+import { AppContext } from '../context/AppContext';
+
 
 const Budget = () => {
-  const { dispatch, Currency } = useContext(AppContext);
-  const [budget, setBudget] = useState("");
+    const { budget, expenses, currency, dispatch } = useContext(AppContext);
 
-  const handleBudgetChange = (event) => {
-    console.log("new budget:", event.target.value);
-    setBudget(parseInt(event.target.value));
-  };
+    const handleBudget = (budget) => {
+        const totalExpenses = expenses.reduce((total, item) => {
+            return (total += item.cost)
+        }, 0);
 
-  const handleKeyDown = (event) => {
-    if (event.keyCode === 13) {
-      console.log("enter key pressed");
-      dispatch({ type: "SET_BUDGET", payload: budget });
-    }
-  };
+        if(budget > 20_000){
+            dispatch({
+                type: 'SET_BUDGET',
+                payload: 20_000
+            })
+            alert(`Budget cannot be greater than ${currency}20_000`);    
+        } else if(budget < totalExpenses){
+            dispatch({
+                type: 'SET_BUDGET',
+                payload: totalExpenses
+            })
+            alert("You cannot reduce the budget lower than the spending");
+        } else {
+            dispatch({
+                type: 'SET_BUDGET',
+                payload: budget
+            })
+        }
+    }   
 
-  return (
-    <div className="alert alert-secondary">
-      <label htmlFor="cost">Budget: {Currency}</label>
-      <input
-        required
-        type="number"
-        id="cost"
-        value={budget}
-        style={{ marginLeft: "2rem", width: "10rem" }}
-        onChange={handleBudgetChange}
-        onKeyDown={handleKeyDown}
-      />
-    </div>
-  );
+    return (
+        <div className='alert alert-secondary'>
+            <span>Budget {currency}:
+                <input
+                    type='number'
+                    required='required'
+                    id='budget'
+                    value={budget}
+                    style={{ marginLeft: '1rem' , size: 10}}
+                    onChange={(e) => handleBudget(e.target.value)}
+                    step='10'
+                >
+                </input>
+            </span>
+        </div>
+    )
 };
-
 export default Budget;
